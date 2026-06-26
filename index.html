@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Protocolo de Actuación en Sismo — TdeA I.U.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --tdea-green:#1a6b2a;
+  --tdea-green-mid:#2e7d32;
+  --tdea-green-light:#4caf50;
+  --tdea-green-pale:#e8f5e9;
+  --tdea-navy:#003366;
+  --red-alert:#c62828;
+  --red-light:#ffebee;
+  --yellow:#f9a825;
+  --yellow-light:#fff8e1;
+  --gray-bg:#f4f6f8;
+  --gray-border:#e0e0e0;
+  --gray-text:#2d2d2d;
+  --gray-muted:#6b7280;
+  --shadow:0 2px 8px rgba(0,0,0,0.10);
+  --shadow-lg:0 4px 20px rgba(0,0,0,0.15);
+  --radius:12px;
+  --radius-sm:8px;
+}
+body{font-family:'Montserrat',sans-serif;background:var(--gray-bg);color:var(--gray-text);min-height:100vh;overflow-x:hidden;}
+.screen{display:none;min-height:100vh;animation:fadeIn 0.28s ease;}
+.screen.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+@keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes pulseGlow{0%,100%{box-shadow:0 0 6px rgba(198,40,40,0.4)}50%{box-shadow:0 0 18px rgba(198,40,40,0.85)}}
+@keyframes confetti{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(70px) rotate(720deg);opacity:0}}
+@keyframes slideIn{from{transform:translateX(30px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* ═══ HEADER TDEA ═══ */
+.app-header{background:var(--tdea-green);color:#fff;padding:10px 14px;position:sticky;top:0;z-index:200;box-shadow:0 3px 12px rgba(0,0,0,0.3);}
+.header-row{display:flex;align-items:center;gap:10px;}
+.tdea-logo-wrap{flex-shrink:0;background:#fff;border-radius:8px;padding:4px 8px;display:flex;align-items:center;}
+.tdea-logo-wrap svg{width:auto;height:36px;}
+.header-texts{flex:1;min-width:0;}
+.inst-name{font-size:10px;font-weight:600;letter-spacing:0.8px;opacity:0.85;text-transform:uppercase;}
+.app-title{font-size:13px;font-weight:800;line-height:1.25;margin-top:1px;}
+
+/* ═══ BARRA DE PROGRESO ═══ */
+.progress-wrap{background:var(--tdea-navy);padding:8px 14px 12px;}
+.progress-label{display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,0.85);margin-bottom:5px;font-weight:600;}
+.progress-track{background:rgba(255,255,255,0.18);border-radius:99px;height:7px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,#a5d6a7,#66bb6a,#ffee58);border-radius:99px;transition:width 0.7s cubic-bezier(.25,.8,.25,1);}
+.progress-stars{color:#ffee58;font-size:10px;}
+
+/* ═══ BANNER ALERTA ═══ */
+.alert-banner{background:var(--red-alert);color:#fff;padding:12px 14px;display:flex;align-items:center;gap:10px;animation:pulseGlow 2s infinite;}
+.alert-icon{font-size:26px;animation:shake 0.6s ease infinite;flex-shrink:0;}
+.alert-text{font-size:11.5px;font-weight:600;line-height:1.5;}
+.alert-text strong{font-size:13px;display:block;margin-bottom:2px;}
+
+/* ═══ BOTÓN ASISTENCIA ═══ */
+.asistencia-btn{display:flex;align-items:center;gap:10px;background:var(--tdea-navy);color:#fff;border:none;border-radius:var(--radius);padding:14px 16px;margin:14px 16px 0;width:calc(100% - 32px);cursor:pointer;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;transition:opacity 0.2s;}
+.asistencia-btn:active{opacity:0.85;}
+.asistencia-btn .ab-icon{width:36px;height:36px;background:rgba(255,255,255,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.asistencia-btn .ab-text{text-align:left;}
+.asistencia-btn .ab-text span{display:block;font-size:10px;font-weight:500;opacity:0.8;margin-top:2px;}
+
+/* ═══ SELECTOR DE ROL ═══ */
+.section-title{padding:16px 16px 8px;font-size:11px;font-weight:800;color:var(--tdea-green);text-transform:uppercase;letter-spacing:1px;}
+.rol-grid{display:grid;grid-template-columns:1fr;gap:8px;padding:0 16px 12px;}
+.rol-btn{background:#fff;border:2px solid var(--gray-border);border-radius:var(--radius);padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all 0.18s;text-align:left;width:100%;}
+.rol-btn:active{transform:scale(0.97);}
+.rol-btn.selected{border-color:var(--tdea-green-mid);background:var(--tdea-green-pale);}
+.rol-btn .rol-icon{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+.rol-btn .rol-info strong{font-size:12.5px;font-weight:700;color:var(--gray-text);display:block;}
+.rol-btn .rol-info span{font-size:10.5px;color:var(--gray-muted);}
+.rol-estudiante .rol-icon{background:#e3f2fd;}
+.rol-docente .rol-icon{background:#f3e5f5;}
+.rol-brigadista .rol-icon{background:#fff8e1;}
+
+/* ═══ TARJETAS DE FASES ═══ */
+.phases-grid{display:grid;grid-template-columns:1fr;gap:10px;padding:0 16px 20px;}
+.phase-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:transform 0.15s,box-shadow 0.15s;border:2px solid transparent;position:relative;}
+.phase-card:active{transform:scale(0.98);}
+.phase-card.done{border-color:var(--tdea-green-light);}
+.card-strip{height:5px;}
+.phase-1 .card-strip{background:linear-gradient(90deg,#1565c0,#42a5f5);}
+.phase-2 .card-strip{background:linear-gradient(90deg,#b71c1c,#ef5350);}
+.phase-3 .card-strip{background:linear-gradient(90deg,#e65100,#ffa726);}
+.phase-4 .card-strip{background:linear-gradient(90deg,#1a237e,#5c6bc0);}
+.phase-5 .card-strip{background:linear-gradient(90deg,#1b5e20,#66bb6a);}
+.card-body{padding:12px 14px;}
+.card-num{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gray-muted);margin-bottom:3px;}
+.card-title{font-size:14px;font-weight:800;line-height:1.25;color:var(--gray-text);}
+.card-sub{font-size:10.5px;color:var(--gray-muted);margin-top:3px;}
+.card-footer{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--gray-bg);border-top:1px solid var(--gray-border);}
+.card-badge{font-size:9.5px;font-weight:700;padding:3px 8px;border-radius:99px;}
+.badge-blue{background:#e3f2fd;color:#1565c0;}
+.badge-red{background:#ffebee;color:#b71c1c;}
+.badge-orange{background:#fff3e0;color:#e65100;}
+.badge-indigo{background:#e8eaf6;color:#283593;}
+.badge-green{background:#e8f5e9;color:#1b5e20;}
+.card-arrow{font-size:18px;color:var(--gray-muted);font-weight:700;}
+.done-check{position:absolute;top:8px;right:8px;width:20px;height:20px;background:var(--tdea-green-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:#fff;}
+
+/* ═══ BOTÓN REGRESAR ═══ */
+.back-btn{display:flex;align-items:center;gap:8px;background:#fff;border:none;padding:13px 16px;width:100%;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:700;color:var(--tdea-green);border-bottom:1px solid var(--gray-border);}
+.back-btn:active{background:var(--tdea-green-pale);}
+
+/* ═══ CONTENIDO DE FASE ═══ */
+.screen-content{padding-bottom:32px;}
+.phase-hero{background:var(--tdea-navy);color:#fff;padding:16px;}
+.phase-hero .ph-num{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;opacity:0.75;margin-bottom:4px;}
+.phase-hero .ph-title{font-size:20px;font-weight:800;line-height:1.2;}
+.phase-hero .ph-sub{font-size:11px;opacity:0.8;margin-top:5px;line-height:1.5;}
+
+/* ═══ CARDS DE CONTENIDO ═══ */
+.info-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:12px;}
+.info-card h3{font-size:13px;font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:8px;color:var(--tdea-green);}
+.info-card p{font-size:11.5px;line-height:1.7;color:var(--gray-text);}
+.step-list{list-style:none;}
+.step-list li{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--gray-border);font-size:11.5px;line-height:1.6;color:var(--gray-text);}
+.step-list li:last-child{border-bottom:none;}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--tdea-green-mid);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;margin-top:2px;}
+.step-icon{font-size:19px;flex-shrink:0;margin-top:1px;}
+
+/* ═══ REGLA DE ORO ═══ */
+.gold-rule{background:var(--red-alert);color:#fff;border-radius:var(--radius);padding:18px 16px;text-align:center;margin-bottom:12px;animation:pulseGlow 2s infinite;}
+.gold-rule .gr-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;opacity:0.85;margin-bottom:8px;}
+.gold-rule .big-text{font-size:26px;font-weight:800;letter-spacing:1px;line-height:1.35;}
+.gold-rule p{font-size:11px;opacity:0.9;margin-top:10px;line-height:1.5;}
+.accion-trio{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
+.accion-item{background:#fff;border-radius:var(--radius-sm);padding:12px 6px;text-align:center;box-shadow:var(--shadow);border-top:3px solid var(--red-alert);}
+.accion-item .ai-icon{font-size:22px;display:block;margin-bottom:5px;}
+.accion-item .ai-label{font-size:9.5px;font-weight:800;color:var(--red-alert);text-transform:uppercase;letter-spacing:0.5px;}
+
+/* ═══ TRIVIA ═══ */
+.trivia-section{background:var(--tdea-green);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
+.trivia-header{color:#fff;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;display:flex;align-items:center;gap:8px;}
+.role-tag{font-size:9.5px;background:rgba(255,255,255,0.18);padding:2px 8px;border-radius:99px;color:#fff;font-weight:600;}
+.trivia-q{color:#fff;font-size:12.5px;font-weight:600;line-height:1.6;margin-bottom:12px;}
+.trivia-opt{background:rgba(255,255,255,0.1);border:1.5px solid rgba(255,255,255,0.28);border-radius:var(--radius-sm);padding:11px 13px;color:#fff;font-size:11.5px;font-weight:500;cursor:pointer;margin-bottom:7px;transition:all 0.18s;width:100%;text-align:left;font-family:'Montserrat',sans-serif;}
+.trivia-opt:last-child{margin-bottom:0;}
+.trivia-opt:active{transform:scale(0.98);}
+.trivia-opt.correct{background:rgba(76,175,80,0.4);border-color:#66bb6a;animation:bounce 0.4s ease;}
+.trivia-opt.wrong{background:rgba(198,40,40,0.4);border-color:#ef5350;}
+.trivia-feedback{margin-top:10px;padding:11px;background:rgba(255,255,255,0.12);border-radius:var(--radius-sm);color:#fff;font-size:11.5px;line-height:1.6;display:none;}
+.trivia-feedback.show{display:block;}
+.trivia-feedback strong{font-size:13px;display:block;margin-bottom:3px;}
+
+/* ═══ CELEBRACIÓN ═══ */
+.celebrate{text-align:center;padding:18px 16px;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:12px;display:none;}
+.celebrate.show{display:block;}
+.celebrate .emoji-big{font-size:46px;display:block;margin-bottom:10px;animation:bounce 0.6s ease infinite;}
+.celebrate h3{font-size:15px;font-weight:800;color:var(--tdea-green);}
+.celebrate p{font-size:11px;color:var(--gray-muted);margin-top:5px;line-height:1.6;}
+.confetti-wrap{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;overflow:hidden;}
+.confetti-piece{position:absolute;width:8px;height:8px;border-radius:2px;animation:confetti 1.2s ease-out forwards;}
+
+/* ═══ VEHÍCULO ═══ */
+.vstep{background:#fff;border-radius:var(--radius);padding:13px;box-shadow:var(--shadow);display:flex;align-items:flex-start;gap:11px;margin-bottom:8px;}
+.vstep-icon{font-size:26px;flex-shrink:0;}
+.vstep-info strong{font-size:12.5px;font-weight:700;display:block;margin-bottom:3px;color:var(--gray-text);}
+.vstep-info p{font-size:11px;color:var(--gray-muted);line-height:1.5;}
+
+/* ═══ EMERGENCIA ═══ */
+.emerg-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.emerg-card{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 10px;text-align:center;text-decoration:none;display:block;transition:transform 0.15s;border-top:3px solid var(--tdea-navy);}
+.emerg-card:active{transform:scale(0.96);}
+.emerg-icon{font-size:26px;display:block;margin-bottom:5px;}
+.emerg-num{font-size:24px;font-weight:800;display:block;color:var(--red-alert);}
+.emerg-label{font-size:9.5px;font-weight:700;color:var(--gray-muted);text-transform:uppercase;letter-spacing:0.5px;margin-top:3px;display:block;}
+.emerg-card-full{grid-column:1/-1;background:var(--red-alert);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:14px;text-decoration:none;transition:opacity 0.15s;}
+.emerg-card-full:active{opacity:0.85;}
+.emerg-card-full .e-icon{font-size:32px;}
+.emerg-card-full .e-info strong{font-size:17px;font-weight:800;color:#fff;display:block;}
+.emerg-card-full .e-info span{font-size:10.5px;color:rgba(255,255,255,0.85);}
+
+/* ═══ OPA ═══ */
+.opa-cards{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:12px;}
+.opa-card{border-radius:var(--radius);padding:14px 16px;display:flex;align-items:flex-start;gap:14px;}
+.opa-o{background:#e3f2fd;}
+.opa-p{background:#f3e5f5;}
+.opa-a{background:#e8f5e9;}
+.opa-c{background:var(--yellow-light);}
+.opa-letter{font-size:30px;font-weight:800;flex-shrink:0;line-height:1;}
+.opa-o .opa-letter{color:#1565c0;}
+.opa-p .opa-letter{color:#6a1b9a;}
+.opa-a .opa-letter{color:#1b5e20;}
+.opa-c .opa-letter{font-size:22px;color:#e65100;}
+.opa-text strong{font-size:12.5px;font-weight:800;display:block;margin-bottom:3px;}
+.opa-text p{font-size:11px;line-height:1.6;color:var(--gray-text);}
+
+/* ═══ KIT ═══ */
+.kit-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:12px;}
+.kit-item{background:#fff;border-radius:var(--radius-sm);padding:11px 8px;text-align:center;box-shadow:var(--shadow);border:1px solid var(--gray-border);}
+.kit-ico{font-size:22px;display:block;margin-bottom:5px;}
+.kit-txt{font-size:10px;font-weight:600;color:var(--gray-text);}
+
+/* ═══ WARN BOX ═══ */
+.warn-box{background:var(--red-light);border-left:4px solid var(--red-alert);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:11px 13px;margin-bottom:12px;}
+.warn-box p{font-size:11.5px;color:#b71c1c;font-weight:600;line-height:1.6;}
+
+/* ═══ EVACUACIÓN STEPS ═══ */
+.evac-step{background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:12px 14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;border-left:4px solid var(--tdea-green-mid);}
+.evac-step.danger{border-left-color:var(--red-alert);}
+.es-num{font-size:20px;font-weight:800;color:var(--tdea-green-mid);flex-shrink:0;line-height:1;min-width:24px;}
+.evac-step.danger .es-num{color:var(--red-alert);}
+.es-text strong{font-size:12.5px;font-weight:700;display:block;margin-bottom:3px;}
+.es-text p{font-size:11px;color:var(--gray-muted);line-height:1.5;}
+
+/* ═══ ROL BADGE ═══ */
+.rol-badge{display:inline-flex;align-items:center;gap:6px;background:var(--tdea-green-pale);border:1.5px solid var(--tdea-green-light);border-radius:99px;padding:5px 12px;font-size:10.5px;font-weight:700;color:var(--tdea-green);margin-bottom:12px;}
+
+/* ═══ KIT INTERACTIVO ═══ */
+.kit-tap{cursor:pointer;border:1.5px solid var(--gray-border);position:relative;transition:border-color 0.2s,transform 0.15s;}
+.kit-tap:active{transform:scale(0.95);}
+.kit-tap:hover{border-color:var(--tdea-green-mid);}
+.kit-hint{display:block;font-size:9px;font-weight:700;color:var(--tdea-green);margin-top:4px;letter-spacing:0.3px;}
+
+/* ═══ MODAL KIT ═══ */
+.kit-modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:500;align-items:flex-end;justify-content:center;}
+.kit-modal-bg.open{display:flex;}
+.kit-modal{background:#fff;border-radius:20px 20px 0 0;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;padding:0 0 24px;}
+.kit-modal-handle{width:36px;height:4px;background:var(--gray-border);border-radius:99px;margin:12px auto 0;}
+.kit-modal-header{padding:14px 18px 12px;border-bottom:1px solid var(--gray-border);display:flex;align-items:center;gap:12px;}
+.kit-modal-icon{font-size:32px;flex-shrink:0;}
+.kit-modal-title{font-size:16px;font-weight:800;color:var(--tdea-green);line-height:1.2;}
+.kit-modal-sub{font-size:10.5px;color:var(--gray-muted);margin-top:2px;}
+.kit-modal-close{margin-left:auto;background:var(--gray-bg);border:none;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.kit-modal-body{padding:14px 18px 0;}
+.kit-modal-desc{font-size:12.5px;line-height:1.75;color:var(--gray-text);margin-bottom:14px;}
+.kit-table{width:100%;border-collapse:collapse;font-size:12px;}
+.kit-table thead tr{background:var(--tdea-green);color:#fff;}
+.kit-table thead th{padding:8px 10px;text-align:left;font-weight:700;font-size:11px;}
+.kit-table tbody tr:nth-child(even){background:var(--tdea-green-pale);}
+.kit-table tbody td{padding:8px 10px;border-bottom:1px solid var(--gray-border);vertical-align:top;line-height:1.5;}
+.kit-table tbody td:last-child{text-align:center;font-weight:700;color:var(--tdea-green);white-space:nowrap;}
+.kit-table tfoot tr{background:var(--tdea-navy);}
+.kit-table tfoot td{padding:8px 10px;color:#fff;font-weight:700;font-size:11px;}
+.kit-table tfoot td:last-child{text-align:center;}
+
+/* ═══ PUNTO DE ENCUENTRO ═══ */
+.encuentro-box{background:var(--tdea-green);color:#fff;border-radius:var(--radius);padding:14px 16px;margin-bottom:12px;display:flex;align-items:center;gap:14px;}
+.enc-icon{font-size:32px;flex-shrink:0;}
+.enc-text strong{font-size:13px;font-weight:800;display:block;margin-bottom:3px;}
+.enc-text p{font-size:11px;opacity:0.88;line-height:1.5;}
+
+/* ═══ CTA BUTTONS ═══ */
+.cta-btn{display:block;width:100%;background:var(--tdea-green-mid);color:#fff;border:none;border-radius:var(--radius);padding:14px;font-family:'Montserrat',sans-serif;font-size:13.5px;font-weight:800;cursor:pointer;text-align:center;margin-bottom:10px;transition:background 0.2s;}
+.cta-btn:active{background:var(--tdea-green);}
+.cta-btn-outline{display:block;width:100%;background:#fff;color:var(--tdea-green);border:2px solid var(--tdea-green-mid);border-radius:var(--radius);padding:12px;font-family:'Montserrat',sans-serif;font-size:13.5px;font-weight:800;cursor:pointer;text-align:center;margin-bottom:10px;transition:all 0.2s;}
+.cta-btn-outline:active{background:var(--tdea-green-pale);}
+.cta-btn-navy{display:block;width:100%;background:var(--tdea-navy);color:#fff;border:none;border-radius:var(--radius);padding:14px;font-family:'Montserrat',sans-serif;font-size:13.5px;font-weight:800;cursor:pointer;text-align:center;margin-bottom:10px;transition:opacity 0.2s;}
+.cta-btn-navy:active{opacity:0.85;}
+
+/* ═══ FORMULARIO ASISTENCIA ═══ */
+.form-section{padding:0 16px 12px;}
+.form-group{margin-bottom:14px;}
+.form-label{display:block;font-size:11px;font-weight:700;color:var(--tdea-green);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.5px;}
+.form-input{width:100%;padding:12px 14px;border:1.5px solid var(--gray-border);border-radius:var(--radius-sm);font-family:'Montserrat',sans-serif;font-size:13px;color:var(--gray-text);background:#fff;outline:none;transition:border-color 0.2s;}
+.form-input:focus{border-color:var(--tdea-green-mid);}
+.form-select{width:100%;padding:12px 14px;border:1.5px solid var(--gray-border);border-radius:var(--radius-sm);font-family:'Montserrat',sans-serif;font-size:13px;color:var(--gray-text);background:#fff;outline:none;appearance:none;-webkit-appearance:none;cursor:pointer;}
+.form-select:focus{border-color:var(--tdea-green-mid);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.form-hero{background:var(--tdea-navy);color:#fff;padding:18px 16px 16px;}
+.form-hero strong{font-size:17px;font-weight:800;display:block;margin-bottom:4px;}
+.form-hero span{font-size:11px;opacity:0.8;line-height:1.5;}
+.form-divider{height:1px;background:var(--gray-border);margin:14px 0;}
+.form-check-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray-border);}
+.form-check-row:last-child{border-bottom:none;}
+.form-check-row input[type=checkbox]{width:18px;height:18px;accent-color:var(--tdea-green-mid);cursor:pointer;flex-shrink:0;}
+.form-check-row label{font-size:12px;color:var(--gray-text);cursor:pointer;line-height:1.4;}
+.success-form{text-align:center;padding:30px 16px;display:none;}
+.success-form.show{display:block;}
+.success-form .sf-icon{font-size:56px;display:block;margin-bottom:14px;animation:bounce 0.6s ease infinite;}
+.success-form h3{font-size:18px;font-weight:800;color:var(--tdea-green);margin-bottom:8px;}
+.success-form p{font-size:12px;color:var(--gray-muted);line-height:1.7;}
+.required-star{color:var(--red-alert);}
+.char-counter{font-size:10px;color:var(--gray-muted);text-align:right;margin-top:3px;}
+.firmas-box{background:var(--tdea-green-pale);border:1.5px dashed var(--tdea-green-mid);border-radius:var(--radius-sm);padding:14px;text-align:center;font-size:11px;color:var(--tdea-green);font-weight:600;margin-bottom:10px;}
+
+/* ═══ PANTALLA FINAL ═══ */
+.final-screen{padding:24px 16px 32px;text-align:center;}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     PANTALLA PRINCIPAL — HOME
+══════════════════════════════════════════ -->
+<div id="screen-home" class="screen active">
+
+  <div class="app-header">
+    <div class="header-row">
+      <!-- LOGO TDEA SVG -->
+      <div class="tdea-logo-wrap">
+        <svg viewBox="0 0 140 48" xmlns="http://www.w3.org/2000/svg">
+          <!-- Oval verde -->
+          <ellipse cx="24" cy="24" rx="22" ry="22" fill="#1a6b2a"/>
+          <!-- Camino blanco ondulado -->
+          <path d="M14 36 Q18 28 22 24 Q26 20 24 14 Q22 10 20 8" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M20 38 Q24 30 28 26 Q32 22 30 14" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+          <!-- Hoja curva verde claro -->
+          <path d="M30 6 Q38 10 34 18 Q30 14 30 6Z" fill="#4caf50"/>
+          <!-- Texto TdeA -->
+          <text x="50" y="20" font-family="Montserrat,sans-serif" font-size="13" font-weight="800" fill="#1a6b2a">TdeA</text>
+          <text x="50" y="31" font-family="Montserrat,sans-serif" font-size="7.5" font-weight="600" fill="#1a6b2a">Tecnológico de Antioquia I.U.</text>
+          <text x="50" y="41" font-family="Montserrat,sans-serif" font-size="6.5" font-weight="500" fill="#2e7d32">Institución Universitaria</text>
+        </svg>
+      </div>
+      <div class="header-texts">
+        <div class="inst-name">Tecnológico de Antioquia I.U.</div>
+        <div class="app-title">Protocolo de Actuación en Sismo</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-label">
+      <span>Nivel de Preparación</span>
+      <span id="progress-pct" class="progress-stars">0 / 5 fases</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="alert-banner">
+    <div class="alert-icon">⚠️</div>
+    <div class="alert-text">
+      <strong>Un sismo no avisa. La prevención salva vidas.</strong>
+      ¿Sabes cómo actuar en tu bloque si el piso empieza a moverse ahora mismo?
+    </div>
+  </div>
+
+  <!-- Botón de asistencia -->
+  <button class="asistencia-btn" onclick="window.open('https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=ax0_yh_9sUC0GkiLmA6ff3C9luLEl2pFh0P7H6aTEcdUQktEQjMyQlo2S1IzUlJQR09ZTUY3NEhOTi4u','_blank')">
+    <div class="ab-icon">📋</div>
+    <div class="ab-text">
+      Registrar mi Participación
+      <span>Diligencia el formulario de asistencia</span>
+    </div>
+    <span style="font-size:20px;margin-left:auto;">›</span>
+  </button>
+
+  <div class="screen-content">
+    <div class="section-title">Módulos de Capacitación — Para Todo el Personal</div>
+    <div class="phases-grid">
+
+      <div class="phase-card phase-1" id="card-1" onclick="goPhase(1)">
+        <div class="card-strip"></div>
+        <div class="card-body">
+          <div class="card-num">Fase 1</div>
+          <div class="card-title">Antes del Sismo</div>
+          <div class="card-sub">Preparación y prevención en el TDEA</div>
+        </div>
+        <div class="card-footer">
+          <span class="card-badge badge-blue">Preparación</span>
+          <span class="card-arrow">›</span>
+        </div>
+        <div class="done-check" id="done-1" style="display:none">✓</div>
+      </div>
+
+      <div class="phase-card phase-2" id="card-2" onclick="goPhase(2)">
+        <div class="card-strip"></div>
+        <div class="card-body">
+          <div class="card-num">Fase 2</div>
+          <div class="card-title">Durante el Sismo</div>
+          <div class="card-sub">Supervivencia inmediata — regla de oro</div>
+        </div>
+        <div class="card-footer">
+          <span class="card-badge badge-red">Crítica</span>
+          <span class="card-arrow">›</span>
+        </div>
+        <div class="done-check" id="done-2" style="display:none">✓</div>
+      </div>
+
+      <div class="phase-card phase-3" id="card-3" onclick="goPhase(3)">
+        <div class="card-strip"></div>
+        <div class="card-body">
+          <div class="card-num">Fase 3</div>
+          <div class="card-title">Después del Sismo</div>
+          <div class="card-sub">Evacuación ordenada y reporte</div>
+        </div>
+        <div class="card-footer">
+          <span class="card-badge badge-orange">Evacuación</span>
+          <span class="card-arrow">›</span>
+        </div>
+        <div class="done-check" id="done-3" style="display:none">✓</div>
+      </div>
+
+      <div class="phase-card phase-4" id="card-4" onclick="goPhase(4)">
+        <div class="card-strip"></div>
+        <div class="card-body">
+          <div class="card-num">Fase 4</div>
+          <div class="card-title">Si Está Conduciendo</div>
+          <div class="card-sub">Protocolo en vehículos durante sismo</div>
+        </div>
+        <div class="card-footer">
+          <span class="card-badge badge-indigo">Vehículos</span>
+          <span class="card-arrow">›</span>
+        </div>
+        <div class="done-check" id="done-4" style="display:none">✓</div>
+      </div>
+
+      <div class="phase-card phase-5" id="card-5" onclick="goPhase(5)">
+        <div class="card-strip"></div>
+        <div class="card-body">
+          <div class="card-num">Fase 5</div>
+          <div class="card-title">Recomendaciones y Emergencias</div>
+          <div class="card-sub">Regla OPA y números directos de ayuda</div>
+        </div>
+        <div class="card-footer">
+          <span class="card-badge badge-green">Emergencias</span>
+          <span class="card-arrow">›</span>
+        </div>
+        <div class="done-check" id="done-5" style="display:none">✓</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     FASE 1: ANTES DEL SISMO
+══════════════════════════════════════════ -->
+<div id="screen-1" class="screen">
+  <div class="app-header"><div class="header-row"><div class="tdea-logo-wrap" style="padding:3px 6px;"><svg viewBox="0 0 46 46" width="32" height="32" xmlns="http://www.w3.org/2000/svg"><ellipse cx="23" cy="23" rx="21" ry="21" fill="#1a6b2a"/><path d="M13 35 Q17 27 21 23 Q25 19 23 13 Q21 9 19 7" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M19 37 Q23 29 27 25 Q31 21 29 13" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/><path d="M29 5 Q37 9 33 17 Q29 13 29 5Z" fill="#4caf50"/></svg></div><div><div class="inst-name" style="color:rgba(255,255,255,0.8);font-size:9px;">Fase 1 · Antes del Sismo</div><div class="app-title">Preparación en el TDEA</div></div></div></div>
+  <button class="back-btn" onclick="goHome()">← Regresar al Inicio</button>
+  <div class="screen-content">
+    <div class="phase-hero">
+      <div class="ph-num">Módulo 1 de 5</div>
+      <div class="ph-title">Antes del Sismo</div>
+      <div class="ph-sub">Prepárate antes de que ocurra. La preparación es la única ventaja que tienes sobre un sismo.</div>
+    </div>
+    <div style="padding:14px 16px 0;">
+
+      <div class="info-card">
+        <h3>🚪 Conozca las rutas de evacuación</h3>
+        <ul class="step-list">
+          <li><span class="step-num">1</span><span>Identifica las <strong>rutas de evacuación señalizadas</strong> en cada corredor, laboratorio y biblioteca del TDEA. Practica el recorrido mentalmente.</span></li>
+          <li><span class="step-num">2</span><span>Localiza el <strong>punto de encuentro</strong> asignado para tu bloque. Siempre en zonas externas, alejadas de muros, vidrios y estructuras altas.</span></li>
+          <li><span class="step-num">3</span><span>Identifica las <strong>zonas de seguridad internas</strong>: columnas estructurales, marcos de puertas sólidas, áreas alejadas de ventanas.</span></li>
+        </ul>
+      </div>
+
+      <div class="info-card">
+        <h3>🎒 Identifique el Kit de Emergencia</h3>
+        <p style="font-size:10.5px;color:var(--gray-muted);margin-bottom:10px;">Toca cada elemento para ver su descripción detallada.</p>
+        <div class="kit-grid">
+          <div class="kit-item kit-tap" onclick="openKit('botiquin')"><span class="kit-ico">💊</span><span class="kit-txt">Botiquín básico</span><span class="kit-hint">Ver contenido ›</span></div>
+          <div class="kit-item kit-tap" onclick="openKit('linterna')"><span class="kit-ico">🔦</span><span class="kit-txt">Linterna + pilas</span><span class="kit-hint">Ver detalle ›</span></div>
+          <div class="kit-item kit-tap" onclick="openKit('agua')"><span class="kit-ico">💧</span><span class="kit-txt">Agua potable</span><span class="kit-hint">Ver detalle ›</span></div>
+          <div class="kit-item kit-tap" onclick="openKit('radio')"><span class="kit-ico">📻</span><span class="kit-txt">Radio de baterías</span><span class="kit-hint">Ver detalle ›</span></div>
+          <div class="kit-item kit-tap" onclick="openKit('dinero')"><span class="kit-ico">🪙</span><span class="kit-txt">Dinero en efectivo</span><span class="kit-hint">Ver detalle ›</span></div>
+          <div class="kit-item kit-tap" onclick="openKit('contactos')"><span class="kit-ico">📋</span><span class="kit-txt">Lista de contactos</span><span class="kit-hint">Ver detalle ›</span></div>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <h3>👥 Participe en simulacros y capacitaciones</h3>
+        <p>Los simulacros periódicos del TDEA no son un trámite — son el único entrenamiento real que tiene su cuerpo para actuar sin pensar durante el pánico. <strong>Cada simulacro salva vidas futuras.</strong></p>
+      </div>
+
+      <div class="info-card">
+        <h3>⚡ Asegure objetos y desconecte equipos</h3>
+        <ul class="step-list">
+          <li><span class="step-icon">📚</span><span>Fija estanterías, equipos de laboratorio y muebles altos a las paredes con anclajes sismo-resistentes.</span></li>
+          <li><span class="step-icon">🖥️</span><span>Asegura monitores, proyectores y equipos sobre escritorios con velcro o soportes antideslizantes.</span></li>
+          <li><span class="step-icon">🔌</span><span><strong>Desconecta equipos eléctricos</strong> cuando sea posible, especialmente al final de la jornada.</span></li>
+          <li><span class="step-icon">🪟</span><span>Mantén las áreas de circulación libres de obstáculos para garantizar evacuaciones rápidas.</span></li>
+        </ul>
+      </div>
+
+      <div class="warn-box">
+        <p>⚠️ <strong>Recuerda:</strong> Los pasillos, escaleras y ascensores del TDEA se convierten en zonas críticas durante un sismo. Conoce las rutas alternas de tu bloque antes de que las necesites.</p>
+      </div>
+
+      <button class="cta-btn" onclick="completePhase(1)">✅ He revisado esta fase — Continuar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     FASE 2: DURANTE EL SISMO
+══════════════════════════════════════════ -->
+<div id="screen-2" class="screen">
+  <div class="app-header"><div class="header-row"><div class="tdea-logo-wrap" style="padding:3px 6px;background:rgba(255,255,255,0.95);"><svg viewBox="0 0 46 46" width="32" height="32" xmlns="http://www.w3.org/2000/svg"><ellipse cx="23" cy="23" rx="21" ry="21" fill="#c62828"/><path d="M13 35 Q17 27 21 23 Q25 19 23 13" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M29 5 Q37 9 33 17 Q29 13 29 5Z" fill="#ef9a9a"/></svg></div><div><div class="inst-name" style="color:rgba(255,255,255,0.8);font-size:9px;">Fase 2 · CRÍTICA</div><div class="app-title">Durante el Sismo</div></div></div></div>
+  <button class="back-btn" onclick="goHome()">← Regresar al Inicio</button>
+  <div class="screen-content">
+    <div class="phase-hero" style="background:var(--red-alert);">
+      <div class="ph-num">Módulo 2 de 5 — Supervivencia Inmediata</div>
+      <div class="ph-title">Durante el Sismo</div>
+      <div class="ph-sub">Estos son los segundos más críticos. Lo que hagas en los primeros 5 segundos define el resultado.</div>
+    </div>
+    <div style="padding:14px 16px 0;">
+
+      <div class="gold-rule">
+        <div class="gr-label">La Regla de Oro Internacional</div>
+        <div class="big-text">¡AGÁCHESE!<br>¡CÚBRASE!<br>¡AGÁRRESE!</div>
+        <p>Graba estas tres palabras ahora que no hay pánico. Tu cuerpo las ejecutará cuando no haya tiempo para pensar.</p>
+      </div>
+
+      <div class="accion-trio">
+        <div class="accion-item"><span class="ai-icon">🦵</span><span class="ai-label">Agáchese</span></div>
+        <div class="accion-item"><span class="ai-icon">🛡️</span><span class="ai-label">Cúbrase</span></div>
+        <div class="accion-item"><span class="ai-icon">✊</span><span class="ai-label">Agárrese</span></div>
+      </div>
+
+      <div class="info-card">
+        <h3>✅ Lo que DEBES hacer durante el sismo</h3>
+        <ul class="step-list">
+          <li><span class="step-icon">🧘</span><span><strong>Conserve la calma.</strong> No corra, no grite ni empuje. El pánico colectivo causa más víctimas que el sismo.</span></li>
+          <li><span class="step-icon">🚪</span><span><strong>Aléjese de ventanas, vidrios, muebles altos, espejos y objetos que puedan caer.</strong></span></li>
+          <li><span class="step-icon">🪑</span><span><strong>Protéjase bajo un escritorio sólido</strong> o junto a elementos estructurales resistentes (columnas). <strong>Proteja su cabeza y cuello.</strong></span></li>
+          <li><span class="step-icon">👨‍👩‍👧</span><span>Si está con <strong>niños, niñas o adultos mayores</strong>, brínde apoyo y protección inmediata sin soltarlos.</span></li>
+        </ul>
+      </div>
+
+      <div class="info-card">
+        <h3>🚫 Lo que está ESTRICTAMENTE PROHIBIDO</h3>
+        <ul class="step-list">
+          <li><span style="font-size:18px;color:var(--red-alert);flex-shrink:0;">✖</span><span><strong>No utilice escaleras ni ascensores</strong> durante el sismo bajo ninguna circunstancia.</span></li>
+          <li><span style="font-size:18px;color:var(--red-alert);flex-shrink:0;">✖</span><span>Salir corriendo al exterior mientras el piso sigue moviéndose.</span></li>
+          <li><span style="font-size:18px;color:var(--red-alert);flex-shrink:0;">✖</span><span>Pararse junto a ventanas, espejos o estanterías sin asegurar.</span></li>
+          <li><span style="font-size:18px;color:var(--red-alert);flex-shrink:0;">✖</span><span>Gritar, empujar o provocar pánico en el grupo.</span></li>
+          <li><span style="font-size:18px;color:var(--red-alert);flex-shrink:0;">✖</span><span>Encender velas, fósforos o gas durante o después del sismo.</span></li>
+        </ul>
+      </div>
+
+      <div class="trivia-section" id="trivia-2">
+        <div class="trivia-header">⚡ Micro-Desafío de Decisión</div>
+        <div class="trivia-q">El piso empieza a moverse mientras estás en el TDEA. ¿Cuál es la acción CORRECTA?</div>
+        <div id="trivia-2-opts">
+          <button class="trivia-opt" onclick="answerTrivia2(this, false)">A) Salir corriendo de inmediato hacia las escaleras para evacuar el edificio.</button>
+          <button class="trivia-opt" onclick="answerTrivia2(this, true)">B) Agacharse, cubrirse la cabeza y el cuello bajo un escritorio o junto a una columna, y esperar a que cese el movimiento.</button>
+          <button class="trivia-opt" onclick="answerTrivia2(this, false)">C) Asomarse a la ventana para evaluar la situación exterior antes de actuar.</button>
+        </div>
+        <div class="trivia-feedback" id="trivia-2-fb"></div>
+      </div>
+
+      <div class="celebrate" id="celebrate-2">
+        <span class="emoji-big">🎉</span>
+        <h3>¡Decisión correcta bajo presión!</h3>
+        <p>Ese instinto ya está grabado en tu memoria de emergencia. Cuando llegue el momento real, tu cuerpo recordará.</p>
+      </div>
+
+      <button class="cta-btn" id="btn-complete-2" onclick="completePhase(2)" style="display:none">✅ Fase completada — Continuar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     FASE 3: DESPUÉS DEL SISMO
+══════════════════════════════════════════ -->
+<div id="screen-3" class="screen">
+  <div class="app-header"><div class="header-row"><div class="tdea-logo-wrap" style="padding:3px 6px;"><svg viewBox="0 0 46 46" width="32" height="32" xmlns="http://www.w3.org/2000/svg"><ellipse cx="23" cy="23" rx="21" ry="21" fill="#e65100"/><path d="M13 35 Q17 27 21 23 Q25 19 23 13" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M29 5 Q37 9 33 17 Q29 13 29 5Z" fill="#ffcc80"/></svg></div><div><div class="inst-name" style="color:rgba(255,255,255,0.8);font-size:9px;">Fase 3 · Después del Sismo</div><div class="app-title">Evacuación y Reporte</div></div></div></div>
+  <button class="back-btn" onclick="goHome()">← Regresar al Inicio</button>
+  <div class="screen-content">
+    <div class="phase-hero" style="background:#bf360c;">
+      <div class="ph-num">Módulo 3 de 5 — Evacuación Guiada</div>
+      <div class="ph-title">Después del Sismo</div>
+      <div class="ph-sub">Cuando cese el movimiento, comienza la segunda parte crítica: evacuar con orden y reportar.</div>
+    </div>
+    <div style="padding:14px 16px 0;">
+
+      <div class="evac-step">
+        <div class="es-num">1</div>
+        <div class="es-text"><strong>Cuando finalice el movimiento sísmico y se active la alarma — evacúe</strong><p>No salgas antes. Espera a que cese completamente y suene la alarma de evacuación. Sigue las rutas establecidas.</p></div>
+      </div>
+
+      <div class="evac-step">
+        <div class="es-num">2</div>
+        <div class="es-text"><strong>Diríjase al punto de encuentro y espere indicaciones</strong><p>Camina ordenadamente hasta el punto de encuentro designado de tu bloque. Permanece allí hasta recibir instrucciones oficiales.</p></div>
+      </div>
+
+      <div class="evac-step danger">
+        <div class="es-num">!</div>
+        <div class="es-text"><strong>NO regrese al edificio hasta recibir autorización</strong><p>Bajo ninguna circunstancia. Las réplicas pueden derrumbar estructuras debilitadas. Si dejaste objetos personales — déjalos.</p></div>
+      </div>
+
+      <div class="evac-step">
+        <div class="es-num">3</div>
+        <div class="es-text"><strong>Reporte daños o emergencias a los responsables</strong><p>Al llegar al punto de encuentro, informa al brigadista sobre heridos, daños estructurales visibles o personas atrapadas que hayas visto.</p></div>
+      </div>
+
+      <div class="evac-step">
+        <div class="es-num">4</div>
+        <div class="es-text"><strong>Mantenga la calma — participe responsablemente</strong><p>Colabore con los demás. Una evacuación en pánico es tan peligrosa como el sismo. Tu actitud calmada es un recurso de seguridad.</p></div>
+      </div>
+
+      <div class="encuentro-box">
+        <div class="enc-icon">📍</div>
+        <div class="enc-text">
+          <strong>Punto de Encuentro TDEA</strong>
+          <p>Diríjase siempre al punto de encuentro establecido para su bloque y espere indicaciones del brigadista responsable.</p>
+          <p style="margin-top:8px;font-size:11px;opacity:0.92;line-height:1.55;">💛 <strong>Recuerda:</strong> es importante definir un punto de encuentro con tus familiares para reunirse en caso de emergencia, independientemente del lugar donde cada uno se encuentre.</p>
+        </div>
+      </div>
+
+      <button class="cta-btn-navy" onclick="window.open('file:///C:/Users/auxiliar.ARL/OneDrive%20-%20Tecnologico%20de%20Antioquia%20Institucion%20Universitaria/SISTEMA%20DE%20GESTION%20SST%202026/27.%20HACER/60.%20GESTI%C3%93N%20AMENAZAS/61/Plano/plano_evacuacion_institucional.html','_blank')" style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:14px;">
+        <span style="font-size:18px;">🗺️</span>
+        <span>Consulta tu punto de encuentro más cercano</span>
+        <span style="font-size:13px;opacity:0.75;">›</span>
+      </button>
+
+      <div class="trivia-section" id="trivia-3">
+        <div class="trivia-header">⚡ Trivia Rápida</div>
+        <div class="trivia-q">Después de un sismo, ¿cuándo es seguro regresar al edificio del TDEA?</div>
+        <div id="trivia-3-opts">
+          <button class="trivia-opt" onclick="answerTrivia(3,this,false)">A) Cuando el movimiento haya cesado y ya no sienta réplicas por al menos 10 minutos.</button>
+          <button class="trivia-opt" onclick="answerTrivia(3,this,false)">B) Inmediatamente si visualmente el edificio parece estar en buen estado.</button>
+          <button class="trivia-opt" onclick="answerTrivia(3,this,true)">C) Solo cuando las autoridades competentes y el brigadista declaren el edificio seguro tras inspección técnica.</button>
+        </div>
+        <div class="trivia-feedback" id="trivia-3-fb"></div>
+      </div>
+
+      <div class="celebrate" id="celebrate-3">
+        <span class="emoji-big">🏆</span>
+        <h3>¡Criterio correcto!</h3>
+        <p>Reconocer que solo la inspección técnica autoriza el reingreso es la diferencia entre sobrevivir el sismo y convertirse en víctima de las réplicas.</p>
+      </div>
+
+      <button class="cta-btn" id="btn-complete-3" onclick="completePhase(3)" style="display:none">✅ Fase completada — Continuar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     FASE 4: SI ESTÁ CONDUCIENDO
+══════════════════════════════════════════ -->
+<div id="screen-4" class="screen">
+  <div class="app-header"><div class="header-row"><div class="tdea-logo-wrap" style="padding:3px 6px;"><svg viewBox="0 0 46 46" width="32" height="32" xmlns="http://www.w3.org/2000/svg"><ellipse cx="23" cy="23" rx="21" ry="21" fill="#1a237e"/><path d="M13 35 Q17 27 21 23 Q25 19 23 13" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M29 5 Q37 9 33 17 Q29 13 29 5Z" fill="#7986cb"/></svg></div><div><div class="inst-name" style="color:rgba(255,255,255,0.8);font-size:9px;">Fase 4 · Conducción</div><div class="app-title">Si Está Conduciendo</div></div></div></div>
+  <button class="back-btn" onclick="goHome()">← Regresar al Inicio</button>
+  <div class="screen-content">
+    <div class="phase-hero" style="background:#1a237e;">
+      <div class="ph-num">Módulo 4 de 5 — Protocolo Vehicular</div>
+      <div class="ph-title">Si Está Conduciendo</div>
+      <div class="ph-sub">El parqueadero y las vías del TDEA requieren un protocolo específico durante el sismo.</div>
+    </div>
+    <div style="padding:14px 16px 0;">
+
+      <div class="vstep">
+        <div class="vstep-icon">🛑</div>
+        <div class="vstep-info"><strong>1. Deténgase en un lugar seguro</strong><p>Reduce la velocidad gradualmente. Enciende las luces de emergencia (4 direccionales). Estaciona a la derecha, lejos de puentes, postes, árboles y edificios.</p></div>
+      </div>
+      <div class="vstep">
+        <div class="vstep-icon">🚑</div>
+        <div class="vstep-info"><strong>2. No bloquees las vías</strong><p>Deja libres los carriles centrales para el paso de ambulancias, bomberos y vehículos de rescate. Tu posición puede costar una vida que no es la tuya.</p></div>
+      </div>
+      <div class="vstep">
+        <div class="vstep-icon">🛡️</div>
+        <div class="vstep-info"><strong>3. Permanezca dentro del vehículo</strong><p>El vehículo te protege de objetos que caen. Baja la cabeza bajo el nivel de las ventanas. Espera a que el movimiento termine por completo.</p></div>
+      </div>
+      <div class="vstep">
+        <div class="vstep-icon">✅</div>
+        <div class="vstep-info"><strong>4. Siga las indicaciones</strong><p>Después del sismo, inspecciona visualmente la vía antes de avanzar. Evita puentes y pasos a desnivel hasta confirmar su estado con las autoridades.</p></div>
+      </div>
+
+      <div class="trivia-section" id="trivia-4">
+        <div class="trivia-header">⚡ Trivia Rápida</div>
+        <div class="trivia-q">Estás en el parqueadero del TDEA cuando sientes el sismo. ¿Qué haces PRIMERO?</div>
+        <div id="trivia-4-opts">
+          <button class="trivia-opt" onclick="answerTrivia(4,this,false)">A) Salir rápidamente del carro para buscar un campo abierto.</button>
+          <button class="trivia-opt" onclick="answerTrivia(4,this,true)">B) Reducir velocidad gradualmente, encender las luces de emergencia y estacionarme en zona segura sin bloquear vías.</button>
+          <button class="trivia-opt" onclick="answerTrivia(4,this,false)">C) Acelerar para salir del parqueadero lo más rápido posible.</button>
+        </div>
+        <div class="trivia-feedback" id="trivia-4-fb"></div>
+      </div>
+
+      <div class="celebrate" id="celebrate-4">
+        <span class="emoji-big">🚗</span>
+        <h3>¡Decisión correcta al volante!</h3>
+        <p>La calma al conducir también salva vidas. Una frenada brusca en pánico puede causar accidentes en cadena que dificultan el acceso de los rescatistas.</p>
+      </div>
+
+      <button class="cta-btn" id="btn-complete-4" onclick="completePhase(4)" style="display:none">✅ Fase completada — Continuar</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     FASE 5: RECOMENDACIONES Y EMERGENCIAS
+══════════════════════════════════════════ -->
+<div id="screen-5" class="screen">
+  <div class="app-header"><div class="header-row"><div class="tdea-logo-wrap" style="padding:3px 6px;"><svg viewBox="0 0 46 46" width="32" height="32" xmlns="http://www.w3.org/2000/svg"><ellipse cx="23" cy="23" rx="21" ry="21" fill="#1a6b2a"/><path d="M13 35 Q17 27 21 23 Q25 19 23 13" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M29 5 Q37 9 33 17 Q29 13 29 5Z" fill="#4caf50"/></svg></div><div><div class="inst-name" style="color:rgba(255,255,255,0.8);font-size:9px;">Fase 5 · Recomendaciones</div><div class="app-title">Emergencias y OPA</div></div></div></div>
+  <button class="back-btn" onclick="goHome()">← Regresar al Inicio</button>
+  <div class="screen-content">
+    <div class="phase-hero">
+      <div class="ph-num">Módulo 5 de 5 — Cierre y Acción</div>
+      <div class="ph-title">Recomendaciones y Emergencias</div>
+      <div class="ph-sub">Recomendaciones generales post-sismo, la regla OPA y los números que salvan vidas.</div>
+    </div>
+    <div style="padding:14px 16px 0;">
+
+      <div class="info-card">
+        <h3>🧠 Recomendaciones Generales</h3>
+        <ul class="step-list">
+          <li><span class="step-icon">📵</span><span>Usa <strong>mensajes de texto</strong>, no llamadas. La red se satura; los mensajes llegan incluso con señal débil.</span></li>
+          <li><span class="step-icon">🔌</span><span>No uses interruptores ni aparatos eléctricos si sospechas daños en la instalación eléctrica.</span></li>
+          <li><span class="step-icon">🚿</span><span>Cierra las llaves de gas y agua si detectas fugas o percibes olor a gas antes de cualquier otra acción.</span></li>
+          <li><span class="step-icon">📡</span><span>Sintoniza la emisora oficial de emergencias de Antioquia para recibir instrucciones de las autoridades.</span></li>
+          <li><span class="step-icon">⚡</span><span>Prepárate para <strong>réplicas</strong>. Pueden presentarse minutos u horas después del evento principal con fuerza considerable.</span></li>
+        </ul>
+      </div>
+
+      <div class="info-card" style="margin-bottom:8px;">
+        <h3>💚 Cuide su vida y la de los demás</h3>
+        <p>Trabajamos unidos por la VIDA. Tu preparación individual es parte de la seguridad colectiva del Tecnológico de Antioquia I.U. Cada persona preparada es un multiplicador de protección.</p>
+      </div>
+
+      <div class="opa-cards">
+        <div class="opa-card opa-o">
+          <div class="opa-letter">O</div>
+          <div class="opa-text"><strong>OBSERVE</strong><p>Evalúa el entorno. ¿Daños estructurales? ¿Heridos? ¿Riesgo de incendio o fuga de gas? Solo actúas sobre lo que observas con claridad.</p></div>
+        </div>
+        <div class="opa-card opa-p">
+          <div class="opa-letter">P</div>
+          <div class="opa-text"><strong>PIENSE</strong><p>Analiza en 3 segundos: ¿Cuál es la amenaza real? ¿Cuál es la respuesta más segura para mí y para los demás?</p></div>
+        </div>
+        <div class="opa-card opa-a">
+          <div class="opa-letter">A</div>
+          <div class="opa-text"><strong>ACTÚE</strong><p>Ejecuta con calma y determinación. Comunica, coordina y reporta. Una acción calmada vale más que cien precipitadas.</p></div>
+        </div>
+        <div class="opa-card opa-c">
+          <div class="opa-letter">❤️</div>
+          <div class="opa-text"><strong>Cuide su vida y la de los demás</strong><p>La solidaridad es parte del protocolo. Trabajamos unidos por la VIDA en el Tecnológico de Antioquia I.U.</p></div>
+        </div>
+      </div>
+
+      <div class="info-card" style="margin-bottom:8px;">
+        <h3>📞 Números de Emergencia — Colombia</h3>
+      </div>
+      <div class="emerg-grid">
+        <a href="tel:123" class="emerg-card">
+          <span class="emerg-icon">🆘</span>
+          <span class="emerg-num">123</span>
+          <span class="emerg-label">Línea de emergencia</span>
+        </a>
+        <a href="tel:125" class="emerg-card">
+          <span class="emerg-icon">🚑</span>
+          <span class="emerg-num">125</span>
+          <span class="emerg-label">Ambulancia</span>
+        </a>
+        <a href="tel:6042853220" class="emerg-card">
+          <span class="emerg-icon">🚒</span>
+          <span class="emerg-num">285-3220</span>
+          <span class="emerg-label">Bomberos Medellín</span>
+        </a>
+        <a href="tel:144" class="emerg-card">
+          <span class="emerg-icon">🪖</span>
+          <span class="emerg-num">144</span>
+          <span class="emerg-label">Defensa Civil</span>
+        </a>
+      </div>
+
+      <div class="trivia-section" id="trivia-5">
+        <div class="trivia-header">⚡ Desafío Final — Aplicando OPA</div>
+        <div class="trivia-q">Después del sismo, hueles a gas en el corredor del TDEA. ¿Cuál es tu PRIMER paso siguiendo la regla OPA?</div>
+        <div id="trivia-5-opts">
+          <button class="trivia-opt" onclick="answerTrivia(5,this,false)">A) Encender la luz del corredor para ver mejor de dónde viene la fuga.</button>
+          <button class="trivia-opt" onclick="answerTrivia(5,this,true)">B) OBSERVAR sin usar interruptores, PENSAR en el riesgo de explosión y ACTUAR cerrando la llave de paso y evacuando antes de llamar.</button>
+          <button class="trivia-opt" onclick="answerTrivia(5,this,false)">C) Llamar al 123 inmediatamente desde el mismo sitio donde huele a gas.</button>
+        </div>
+        <div class="trivia-feedback" id="trivia-5-fb"></div>
+      </div>
+
+      <div class="celebrate" id="celebrate-5">
+        <span class="emoji-big">🏅</span>
+        <h3>¡Aplicación perfecta de OPA!</h3>
+        <p>El uso de interruptores o celulares cerca de una fuga puede generar la chispa para una explosión. Tu criterio es el de un experto en seguridad.</p>
+      </div>
+
+      <button class="cta-btn" id="btn-complete-5" onclick="completePhase(5)" style="display:none">🏆 Protocolo Completado — Ver Certificado</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     PANTALLA ASISTENCIA / PARTICIPACIÓN
+══════════════════════════════════════════ -->
+<div id="screen-asistencia" class="screen">
+  <div class="app-header">
+    <div class="header-row">
+      <div class="tdea-logo-wrap" style="padding:3px 6px;">
+        <svg viewBox="0 0 140 48" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="24" cy="24" rx="22" ry="22" fill="#1a6b2a"/>
+          <path d="M14 36 Q18 28 22 24 Q26 20 24 14 Q22 10 20 8" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          <path d="M20 38 Q24 30 28 26 Q32 22 30 14" stroke="#ffffff" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.6"/>
+          <path d="M30 6 Q38 10 34 18 Q30 14 30 6Z" fill="#4caf50"/>
+          <text x="50" y="20" font-family="Montserrat,sans-serif" font-size="13" font-weight="800" fill="#1a6b2a">TdeA</text>
+          <text x="50" y="31" font-family="Montserrat,sans-serif" font-size="7.5" font-weight="600" fill="#1a6b2a">Tecnológico de Antioquia I.U.</text>
+          <text x="50" y="41" font-family="Montserrat,sans-serif" font-size="6.5" font-weight="500" fill="#2e7d32">Institución Universitaria</text>
+        </svg>
+      </div>
+      <div class="header-texts">
+        <div class="inst-name">Registro de Participación</div>
+        <div class="app-title">Lista de Asistencia</div>
+      </div>
+    </div>
+  </div>
+  <button class="back-btn" onclick="goHome()">← Regresar al Inicio</button>
+
+  <div class="screen-content">
+    <div class="form-hero">
+      <strong>📋 Capacitación en Sismo — TDEA</strong>
+      <span>Diligencie el formulario para registrar su participación en la actividad de capacitación sobre el Protocolo de Actuación en Sismo del Tecnológico de Antioquia I.U.</span>
+    </div>
+
+    <div id="form-wrap">
+      <div class="form-section" style="padding-top:16px;">
+
+        <div class="form-group">
+          <label class="form-label">Nombre Completo <span class="required-star">*</span></label>
+          <input class="form-input" type="text" id="f-nombre" placeholder="Ej: Carlos Andrés Restrepo Gómez" maxlength="80">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Tipo de Documento <span class="required-star">*</span></label>
+            <select class="form-select" id="f-tipodoc">
+              <option value="">Seleccionar...</option>
+              <option>Cédula de Ciudadanía</option>
+              <option>Tarjeta de Identidad</option>
+              <option>Cédula de Extranjería</option>
+              <option>Pasaporte</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Número de Documento <span class="required-star">*</span></label>
+            <input class="form-input" type="number" id="f-doc" placeholder="Ej: 1234567890">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Rol en el TDEA <span class="required-star">*</span></label>
+          <select class="form-select" id="f-rol">
+            <option value="">Seleccionar...</option>
+            <option>Estudiante</option>
+            <option>Docente</option>
+            <option>Colaborador Administrativo</option>
+            <option>Personal de Apoyo / Servicios Generales</option>
+            <option>Brigadista</option>
+            <option>Personal Directivo</option>
+            <option>Contratista / Proveedor</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Facultad / Dependencia</label>
+            <select class="form-select" id="f-facultad">
+              <option value="">Seleccionar...</option>
+              <option>Facultad de Ciencias Básicas</option>
+              <option>Facultad de Ciencias Sociales</option>
+              <option>Facultad de Ingeniería</option>
+              <option>Facultad de Ciencias Administrativas</option>
+              <option>Bienestar Universitario</option>
+              <option>Rectoría</option>
+              <option>Vicerrectoría Académica</option>
+              <option>Dirección Administrativa</option>
+              <option>Biblioteca</option>
+              <option>Otro</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Bloque / Sede</label>
+            <select class="form-select" id="f-bloque">
+              <option value="">Seleccionar...</option>
+              <option>Bloque 1</option>
+              <option>Bloque 2</option>
+              <option>Bloque 3</option>
+              <option>Bloque 4</option>
+              <option>Bloque 5</option>
+              <option>Biblioteca Central</option>
+              <option>Coliseo</option>
+              <option>Sede Externa</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Correo Electrónico Institucional</label>
+          <input class="form-input" type="email" id="f-email" placeholder="usuario@tdea.edu.co">
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Fecha de Participación <span class="required-star">*</span></label>
+            <input class="form-input" type="date" id="f-fecha">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hora</label>
+            <input class="form-input" type="time" id="f-hora">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Actividad / Capacitación</label>
+          <input class="form-input" type="text" id="f-actividad" value="Protocolo de Actuación en Sismo — TDEA I.U." readonly style="background:#f9f9f9;color:var(--gray-muted);">
+        </div>
+
+        <div style="background:#fff;border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);margin-bottom:14px;">
+          <div style="font-size:11px;font-weight:800;color:var(--tdea-green);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Confirmo que:</div>
+          <div class="form-check-row">
+            <input type="checkbox" id="ch1">
+            <label for="ch1">Participé en la capacitación sobre el Protocolo de Actuación en Sismo del TDEA.</label>
+          </div>
+          <div class="form-check-row">
+            <input type="checkbox" id="ch2">
+            <label for="ch2">Conozco las rutas de evacuación y el punto de encuentro de mi bloque.</label>
+          </div>
+          <div class="form-check-row">
+            <input type="checkbox" id="ch3">
+            <label for="ch3">Conozco la regla de oro: ¡Agáchese, Cúbrase y Agárrese!</label>
+          </div>
+          <div class="form-check-row">
+            <input type="checkbox" id="ch4">
+            <label for="ch4">Autorizo el uso de mis datos para registros institucionales de capacitación (Ley 1581 de 2012).</label>
+          </div>
+        </div>
+
+        <div class="firmas-box">
+          🖊️ Su registro queda consignado digitalmente con la información diligenciada.<br>
+          <span style="font-size:10px;opacity:0.8;">Documento de asistencia válido para efectos institucionales del TDEA.</span>
+        </div>
+
+        <div id="form-error" style="display:none;background:var(--red-light);border-left:4px solid var(--red-alert);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:11px 13px;margin-bottom:12px;">
+          <p style="font-size:11.5px;color:#b71c1c;font-weight:600;">⚠️ <span id="form-error-msg">Por favor completa los campos obligatorios.</span></p>
+        </div>
+
+        <button class="cta-btn-navy" onclick="submitAsistencia()">📋 Registrar mi Participación</button>
+        <button class="cta-btn-outline" onclick="goHome()">← Volver al Inicio</button>
+      </div>
+    </div>
+
+    <div class="success-form" id="success-form">
+      <span class="sf-icon">✅</span>
+      <h3>¡Participación Registrada!</h3>
+      <p id="success-msg">Tu asistencia ha sido registrada exitosamente en el sistema del TDEA. Recuerda aplicar lo aprendido y compartirlo con tu familia y compañeros.</p>
+      <div style="background:var(--tdea-green-pale);border:2px solid var(--tdea-green-mid);border-radius:var(--radius);padding:16px;margin:16px 0;text-align:left;">
+        <div id="resumen-registro" style="font-size:11.5px;color:var(--gray-text);line-height:1.9;"></div>
+      </div>
+      <div style="font-size:11px;color:var(--gray-muted);margin-bottom:20px;line-height:1.6;"><strong>Tecnológico de Antioquia I.U.</strong><br>Trabajamos unidos por la VIDA</div>
+      <button class="cta-btn" onclick="goHome()">← Volver al Inicio</button>
+      <button class="cta-btn-outline" onclick="resetForm()">📋 Registrar otra persona</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     PANTALLA FINAL — CERTIFICADO
+══════════════════════════════════════════ -->
+<div id="screen-final" class="screen">
+  <div class="app-header"><div class="header-row"><div class="tdea-logo-wrap" style="padding:3px 6px;"><svg viewBox="0 0 140 48" xmlns="http://www.w3.org/2000/svg"><ellipse cx="24" cy="24" rx="22" ry="22" fill="#1a6b2a"/><path d="M14 36 Q18 28 22 24 Q26 20 24 14" stroke="#fff" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M30 6 Q38 10 34 18 Q30 14 30 6Z" fill="#4caf50"/><text x="50" y="22" font-family="Montserrat,sans-serif" font-size="13" font-weight="800" fill="#1a6b2a">TdeA</text><text x="50" y="34" font-family="Montserrat,sans-serif" font-size="7" font-weight="600" fill="#2e7d32">Tecnológico de Antioquia I.U.</text></svg></div><div><div class="inst-name">Capacitación Completada</div><div class="app-title">Certificado de Preparación</div></div></div></div>
+
+  <div class="final-screen">
+    <div style="font-size:70px;margin-bottom:14px;animation:bounce 0.8s ease infinite;">🛡️</div>
+    <h2 style="font-size:22px;font-weight:800;color:var(--tdea-green);margin-bottom:8px;">¡Felicitaciones!</h2>
+    <p style="font-size:12.5px;color:var(--gray-muted);line-height:1.7;margin-bottom:22px;">Has completado las <strong>5 fases del Protocolo de Actuación en Sismo</strong> del Tecnológico de Antioquia I.U. Tu nivel de preparación es óptimo.</p>
+
+    <div style="background:var(--tdea-green-pale);border:2px solid var(--tdea-green-mid);border-radius:var(--radius);padding:18px;margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;color:var(--tdea-green);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">Nivel Alcanzado</div>
+      <div style="font-size:26px;font-weight:800;color:var(--tdea-green);">⭐⭐⭐⭐⭐</div>
+      <div style="font-size:12px;color:var(--gray-muted);margin-top:4px;font-weight:600;">Agente Preparado — Nivel 5 / 5</div>
+    </div>
+
+    <div style="background:#fff;border-radius:var(--radius);padding:16px;margin-bottom:16px;box-shadow:var(--shadow);border-top:4px solid var(--red-alert);">
+      <div style="font-size:10px;color:var(--gray-muted);margin-bottom:8px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;">Recuerda siempre</div>
+      <div style="font-size:17px;font-weight:800;color:var(--red-alert);line-height:1.5;">AGÁCHESE · CÚBRASE · AGÁRRESE</div>
+      <div style="font-size:11px;color:var(--gray-muted);margin-top:8px;font-weight:600;">OBSERVE · PIENSE · ACTÚE</div>
+      <div style="font-size:10px;color:var(--tdea-green);margin-top:6px;font-weight:700;">Trabajamos unidos por la VIDA — TdeA I.U.</div>
+    </div>
+
+    <div style="background:var(--tdea-navy);border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;text-align:center;">
+      <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.8);margin-bottom:8px;">Emergencias</div>
+      <div style="display:flex;justify-content:center;gap:20px;">
+        <div style="text-align:center;"><a href="tel:123" style="color:#ffee58;font-size:18px;font-weight:800;text-decoration:none;">123</a><div style="color:rgba(255,255,255,0.7);font-size:9px;margin-top:2px;">Emergencias</div></div>
+        <div style="text-align:center;"><a href="tel:125" style="color:#ffee58;font-size:18px;font-weight:800;text-decoration:none;">125</a><div style="color:rgba(255,255,255,0.7);font-size:9px;margin-top:2px;">Ambulancia</div></div>
+        <div style="text-align:center;"><a href="tel:6042853220" style="color:#ffee58;font-size:15px;font-weight:800;text-decoration:none;">285-3220</a><div style="color:rgba(255,255,255,0.7);font-size:9px;margin-top:2px;">Bomberos Medellín</div></div>
+        <div style="text-align:center;"><a href="tel:144" style="color:#ffee58;font-size:18px;font-weight:800;text-decoration:none;">144</a><div style="color:rgba(255,255,255,0.7);font-size:9px;margin-top:2px;">Defensa Civil</div></div>
+      </div>
+    </div>
+
+    <div style="background:#fff;border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);margin-bottom:16px;">
+      <div style="background:var(--tdea-green);padding:12px 16px;text-align:center;">
+        <div style="font-size:11px;font-weight:700;color:#fff;text-transform:uppercase;letter-spacing:0.5px;">📋 Registro de Participación</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.8);margin-top:2px;">Diligencia el formulario para quedar registrado</div>
+      </div>
+      <iframe src="https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=ax0_yh_9sUC0GkiLmA6ff3C9luLEl2pFh0P7H6aTEcdUQktEQjMyQlo2S1IzUlJQR09ZTUY3NEhOTi4u&embed=true"
+        style="width:100%;height:520px;border:none;display:block;"
+        frameborder="0"
+        allowfullscreen>
+      </iframe>
+    </div>
+    <button class="cta-btn-outline" onclick="goHome()">← Volver al Inicio</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODAL KIT DE EMERGENCIA
+══════════════════════════════════════════ -->
+<div class="kit-modal-bg" id="kit-modal-bg" onclick="closeKit(event)">
+  <div class="kit-modal" id="kit-modal">
+    <div class="kit-modal-handle"></div>
+    <div class="kit-modal-header">
+      <span class="kit-modal-icon" id="km-icon"></span>
+      <div>
+        <div class="kit-modal-title" id="km-title"></div>
+        <div class="kit-modal-sub" id="km-sub"></div>
+      </div>
+      <button class="kit-modal-close" onclick="closeKit(null)">✕</button>
+    </div>
+    <div class="kit-modal-body" id="km-body"></div>
+  </div>
+</div>
+
+<div class="confetti-wrap" id="confetti-wrap"></div>
+
+<script>
+var completed = {};
+
+var TRIVIA_ANSWERS = {
+  3:{ok:"✅ Correcto. Aunque el edificio parezca intacto visualmente, pueden existir daños estructurales internos invisibles. Solo la inspección técnica oficial autoriza el reingreso al TDEA.",
+     err:"❌ Incorrecto. El edificio puede verse bien externamente y tener daños estructurales graves. Solo las autoridades con respaldo técnico pueden autorizar el reingreso."},
+  4:{ok:"✅ ¡Perfecto! Reducir velocidad con control y señalizar primero evita accidentes en cadena y mantiene libres las vías para los vehículos de rescate.",
+     err:"❌ Incorrecto. Salir del carro expone a objetos que caen. Acelerar en una vía potencialmente dañada es extremadamente peligroso. La primera acción siempre es reducir velocidad con control."},
+  5:{ok:"✅ Aplicación perfecta de OPA. El uso de interruptores o celulares cerca de una fuga de gas puede generar la chispa de una explosión. Cierra el paso y evacúa antes de comunicarte.",
+     err:"❌ Incorrecto. Encender la luz o usar el celular junto a una fuga puede generar una explosión. Primero cierra el paso de gas, evacúa, y solo entonces comunícate desde afuera."}
+};
+
+function answerTrivia2(btn, ok){
+  var optsEl = document.getElementById('trivia-2-opts');
+  if(optsEl.dataset.answered) return;
+  optsEl.dataset.answered = '1';
+  optsEl.querySelectorAll('.trivia-opt').forEach(function(b){b.disabled=true;});
+  btn.classList.add(ok ? 'correct' : 'wrong');
+  var fb = document.getElementById('trivia-2-fb');
+  if(ok){
+    fb.innerHTML = '<strong>✅ ¡Correcto!</strong> Salir corriendo durante el sismo es la acción más peligrosa. Primero protéjase en el lugar aplicando la regla de oro: Agáchese, Cúbrase y Agárrese.';
+    setTimeout(function(){
+      document.getElementById('celebrate-2').classList.add('show');
+      document.getElementById('btn-complete-2').style.display = 'block';
+      shootConfetti();
+    }, 600);
+  } else {
+    fb.innerHTML = '<strong>❌ Incorrecto.</strong> La acción correcta es protegerse en el lugar bajo un escritorio o junto a una columna. Evacuar durante el sismo aumenta el riesgo de lesiones.';
+    setTimeout(function(){document.getElementById('btn-complete-2').style.display = 'block';}, 800);
+  }
+  fb.classList.add('show');
+}
+
+function answerTrivia(n,btn,ok){
+  var optsEl=document.getElementById('trivia-'+n+'-opts');
+  if(optsEl.dataset.answered) return;
+  optsEl.dataset.answered='1';
+  optsEl.querySelectorAll('.trivia-opt').forEach(function(b){b.disabled=true;});
+  btn.classList.add(ok?'correct':'wrong');
+  var fb=document.getElementById('trivia-'+n+'-fb');
+  var ans=TRIVIA_ANSWERS[n];
+  fb.innerHTML='<strong>'+(ok?ans.ok.slice(0,2):ans.err.slice(0,2))+'</strong> '+(ok?ans.ok.slice(3):ans.err.slice(3));
+  fb.classList.add('show');
+  if(ok){setTimeout(function(){document.getElementById('celebrate-'+n).classList.add('show');document.getElementById('btn-complete-'+n).style.display='block';shootConfetti();},600);}
+  else{setTimeout(function(){document.getElementById('btn-complete-'+n).style.display='block';},800);}
+}
+
+function goPhase(n){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById('screen-'+n).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function goScreen(id){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+  if(id==='screen-asistencia'){
+    var today=new Date();
+    var yyyy=today.getFullYear();
+    var mm=String(today.getMonth()+1).padStart(2,'0');
+    var dd=String(today.getDate()).padStart(2,'0');
+    var hh=String(today.getHours()).padStart(2,'0');
+    var mi=String(today.getMinutes()).padStart(2,'0');
+    var fEl=document.getElementById('f-fecha');
+    var hEl=document.getElementById('f-hora');
+    if(fEl&&!fEl.value) fEl.value=yyyy+'-'+mm+'-'+dd;
+    if(hEl&&!hEl.value) hEl.value=hh+':'+mi;
+  }
+}
+
+function goHome(){
+  document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+  document.getElementById('screen-home').classList.add('active');
+  window.scrollTo(0,0);
+  updateProgress();
+}
+
+function completePhase(n){
+  if(!completed[n]){
+    completed[n]=true;
+    document.getElementById('done-'+n).style.display='flex';
+    document.getElementById('card-'+n).classList.add('done');
+    updateProgress();
+  }
+  if(Object.keys(completed).length>=5){
+    setTimeout(function(){
+      document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});
+      document.getElementById('screen-final').classList.add('active');
+      window.scrollTo(0,0);
+      shootConfetti();setTimeout(shootConfetti,600);setTimeout(shootConfetti,1200);
+    },400);
+  } else {
+    goHome();
+  }
+}
+
+function updateProgress(){
+  var count=Object.keys(completed).length;
+  var pct=Math.round((count/5)*100);
+  document.getElementById('progress-fill').style.width=pct+'%';
+  var stars='';
+  for(var i=0;i<count;i++) stars+='⭐';
+  document.getElementById('progress-pct').textContent=(stars?stars+' ':'')+count+' / 5 fases';
+}
+
+function submitAsistencia(){
+  var nombre=document.getElementById('f-nombre').value.trim();
+  var tipodoc=document.getElementById('f-tipodoc').value;
+  var doc=document.getElementById('f-doc').value.trim();
+  var rol=document.getElementById('f-rol').value;
+  var fecha=document.getElementById('f-fecha').value;
+  var ch4=document.getElementById('ch4').checked;
+  var errEl=document.getElementById('form-error');
+  var errMsg=document.getElementById('form-error-msg');
+  errEl.style.display='none';
+  if(!nombre){errMsg.textContent='El nombre completo es obligatorio.';errEl.style.display='block';document.getElementById('f-nombre').focus();return;}
+  if(!tipodoc){errMsg.textContent='Selecciona el tipo de documento.';errEl.style.display='block';return;}
+  if(!doc){errMsg.textContent='El número de documento es obligatorio.';errEl.style.display='block';document.getElementById('f-doc').focus();return;}
+  if(!rol){errMsg.textContent='Selecciona tu rol en el TDEA.';errEl.style.display='block';return;}
+  if(!fecha){errMsg.textContent='La fecha de participación es obligatoria.';errEl.style.display='block';return;}
+  if(!ch4){errMsg.textContent='Debes aceptar el uso de tus datos personales para continuar (casilla 4).';errEl.style.display='block';return;}
+  var facultad=document.getElementById('f-facultad').value||'No especificada';
+  var bloque=document.getElementById('f-bloque').value||'No especificado';
+  var email=document.getElementById('f-email').value||'No registrado';
+  var hora=document.getElementById('f-hora').value||'No registrada';
+  var fechaFmt=fecha.split('-').reverse().join('/');
+  document.getElementById('resumen-registro').innerHTML=
+    '<b>Nombre:</b> '+nombre+'<br>'+
+    '<b>Documento:</b> '+tipodoc+' '+doc+'<br>'+
+    '<b>Rol:</b> '+rol+'<br>'+
+    '<b>Facultad / Dependencia:</b> '+facultad+'<br>'+
+    '<b>Bloque:</b> '+bloque+'<br>'+
+    '<b>Correo:</b> '+email+'<br>'+
+    '<b>Fecha:</b> '+fechaFmt+' · '+hora+'<br>'+
+    '<b>Actividad:</b> Protocolo de Actuación en Sismo — TdeA I.U.';
+  document.getElementById('form-wrap').style.display='none';
+  document.getElementById('success-form').classList.add('show');
+  window.scrollTo(0,0);
+  shootConfetti();
+  setTimeout(shootConfetti,500);
+}
+
+function resetForm(){
+  document.getElementById('f-nombre').value='';
+  document.getElementById('f-tipodoc').value='';
+  document.getElementById('f-doc').value='';
+  document.getElementById('f-rol').value='';
+  document.getElementById('f-facultad').value='';
+  document.getElementById('f-bloque').value='';
+  document.getElementById('f-email').value='';
+  document.getElementById('f-hora').value='';
+  ['ch1','ch2','ch3','ch4'].forEach(function(id){document.getElementById(id).checked=false;});
+  document.getElementById('form-error').style.display='none';
+  document.getElementById('success-form').classList.remove('show');
+  document.getElementById('form-wrap').style.display='block';
+  window.scrollTo(0,0);
+  goScreen('screen-asistencia');
+}
+
+function shootConfetti(){
+  var wrap=document.getElementById('confetti-wrap');
+  var colors=['#c62828','#1a6b2a','#f9a825','#003366','#6a1b9a','#e65100','#66bb6a','#42a5f5'];
+  for(var i=0;i<20;i++){
+    var p=document.createElement('div');
+    p.className='confetti-piece';
+    p.style.left=Math.random()*100+'%';
+    p.style.top='-10px';
+    p.style.background=colors[Math.floor(Math.random()*colors.length)];
+    p.style.animationDelay=(Math.random()*0.5)+'s';
+    p.style.animationDuration=(0.9+Math.random()*0.6)+'s';
+    wrap.appendChild(p);
+    setTimeout((function(el){return function(){el.remove()};})(p),1800);
+  }
+}
+
+updateProgress();
+
+var KIT_DATA = {
+  botiquin:{
+    icon:'💊',
+    title:'Botiquín Básico',
+    sub:'Contenido mínimo reglamentario — Kit institucional TDEA',
+    desc:'',
+    tabla:[
+      ['Gasas limpias','Paquete x 20','1'],
+      ['Esparadrapo de tela rollo 4"','Unidad','1'],
+      ['Bajalenguas','Paquete por 20','1'],
+      ['Guantes de látex para examen','Caja por 100','1'],
+      ['Venda elástica 2 x 5 yardas','Unidad','1'],
+      ['Venda elástica 3 x 5 yardas','Unidad','1'],
+      ['Venda elástica 5 x 5 yardas','Unidad','1'],
+      ['Venda de algodón 3 x 5 yardas','Unidad','1'],
+      ['Venda de algodón 3 x 5 yardas (adicional)','Unidad','1'],
+      ['Yodopovidona (jabón quirúrgico)','Frasco x 120 ml','1'],
+      ['Solución salina 250 cc ó 500 cc','Unidad','2'],
+      ['Termómetro digital','Unidad','1'],
+      ['Alcohol antiséptico frasco por 275 ml','Unidad','1']
+    ],
+    total:'14'
+  },
+  linterna:{
+    icon:'🔦',
+    title:'Linterna + Pilas',
+    sub:'Esencial para actuar en condiciones de baja visibilidad',
+    desc:'La linterna permite actuar rápidamente en condiciones de poca luz, examinar lesiones con precisión (como revisar reflejos pupilares), facilitar la búsqueda de insumos médicos en el botiquín y enviar señales de rescate si te encuentras atrapado o en una situación de emergencia. Mantén siempre pilas de repuesto dentro del kit y verifica su carga periódicamente.'
+  },
+  agua:{
+    icon:'💧',
+    title:'Agua Potable',
+    sub:'La herramienta más versátil del kit de emergencia',
+    desc:'El agua potable es vital porque es la herramienta más segura y versátil para limpiar heridas, prevenir infecciones y mantener la rehidratación básica de una persona lesionada o en estado de shock durante una emergencia, mientras llega la ayuda médica. Se recomienda tener mínimo 2 litros por persona disponibles en el kit institucional, con rotación cada 6 meses.'
+  },
+  radio:{
+    icon:'📻',
+    title:'Radio de Baterías',
+    sub:'Comunicación cuando todo lo demás falla',
+    desc:'Las radios de baterías garantizan la comunicación y el acceso a información en tiempo real durante emergencias, apagones o desastres naturales. A diferencia del celular, no dependen de la red eléctrica ni de la señal de datos. Permiten recibir instrucciones oficiales de las autoridades, alertas de réplicas y noticias sobre el estado de la emergencia cuando los canales digitales colapsan.'
+  },
+  dinero:{
+    icon:'🪙',
+    title:'Dinero en Efectivo',
+    sub:'Autonomía inmediata cuando los sistemas digitales fallan',
+    desc:'El efectivo es vital porque los sistemas digitales —datáfonos, cajeros automáticos y plataformas bancarias— suelen dejar de funcionar durante apagones o desastres. El dinero en efectivo te garantiza autonomía inmediata para comprar agua, alimentos, medicinas o pagar transporte cuando todo lo demás falla. Se recomienda tener una cantidad suficiente para cubrir al menos 72 horas de necesidades básicas.'
+  },
+  contactos:{
+    icon:'📋',
+    title:'Lista de Contactos',
+    sub:'Tu información de emergencia siempre accesible',
+    desc:'La lista de contactos es vital porque permite a los paramédicos y autoridades acceder rápidamente a tu información médica esencial (grupo sanguíneo, alergias, medicamentos) y notificar a tus seres queridos si no puedes comunicarte por ti mismo. Incluye: contacto familiar, médico de cabecera, EPS, ARL y el número interno de la brigada de emergencias del TDEA. Imprímela — no depende de batería.'
+  }
+};
+
+function openKit(id){
+  var d = KIT_DATA[id];
+  if(!d) return;
+  document.getElementById('km-icon').textContent = d.icon;
+  document.getElementById('km-title').textContent = d.title;
+  document.getElementById('km-sub').textContent = d.sub;
+  var body = document.getElementById('km-body');
+  var html = '';
+  if(d.desc){
+    html += '<p class="kit-modal-desc">'+d.desc+'</p>';
+  }
+  if(d.tabla){
+    html += '<table class="kit-table"><thead><tr><th>Elemento</th><th>Presentación</th><th>Cant.</th></tr></thead><tbody>';
+    d.tabla.forEach(function(r){
+      html += '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td></tr>';
+    });
+    html += '</tbody>';
+    if(d.total){
+      html += '<tfoot><tr><td colspan="2"><strong>TOTAL ÍTEMS</strong></td><td>'+d.total+'</td></tr></tfoot>';
+    }
+    html += '</table>';
+  }
+  body.innerHTML = html;
+  document.getElementById('kit-modal-bg').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeKit(e){
+  if(e && e.target !== document.getElementById('kit-modal-bg')) return;
+  document.getElementById('kit-modal-bg').classList.remove('open');
+  document.body.style.overflow = '';
+}
+</script>
+</body>
+</html>
